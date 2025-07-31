@@ -270,6 +270,12 @@ function renderRecentActivity() {
 function renderRevenueChart() {
     const ctx = document.getElementById('revenueChart').getContext('2d');
     
+    // Destroy existing chart if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
     // Group payments by date
     const dateGroups = {};
     payments.forEach(payment => {
@@ -524,4 +530,3 @@ function showError(message) {
 
 // Initialize the application when the page loads
 document.addEventListener('DOMContentLoaded', init);
-
