@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1><i class="icon">👥</i> Membership Manager</h1>
+                <div class="admin-info">
+                    <span id="admin-name">Loading...</span>
+                    <div class="status-indicator active"></div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-btn" data-tab="members">Members</button>
+            <button class="tab-btn" data-tab="payments">Payments</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-info">
+                        <h3 id="total-members">0</h3>
+                        <p>Total Members</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3 id="active-members">0</h3>
+                        <p>Active Members</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <h3 id="total-revenue">0</h3>
+                        <p>Total Credits</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <h3 id="expired-members">0</h3>
+                        <p>Expired/Due</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="chart-container">
+                    <h3>Revenue Over Time</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="recent-activity">
+                    <h3>Recent Activity</h3>
+                    <div id="activity-feed"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Tab -->
+        <div class="tab-content" id="members">
+            <div class="section-header">
+                <h2>Member Management</h2>
+                <div class="member-filters">
+                    <select id="status-filter">
+                        <option value="all">All Members</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="due">Payment Due</option>
+                    </select>
+                    <input type="text" id="search-members" placeholder="Search members...">
+                </div>
+            </div>
+            <div class="members-list" id="members-list"></div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div class="tab-content" id="payments">
+            <div class="section-header">
+                <h2>Payment History</h2>
+                <div class="payment-filters">
+                    <input type="date" id="date-from">
+                    <input type="date" id="date-to">
+                    <button id="filter-payments">Filter</button>
+                </div>
+            </div>
+            <div class="payments-list" id="payments-list"></div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings">
+            <div class="settings-container">
+                <div class="settings-section">
+                    <h3>Membership Pricing</h3>
+                    <div class="pricing-config">
+                        <div class="form-group">
+                            <label for="pricing-model">Pricing Model:</label>
+                            <select id="pricing-model">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="biweekly">Bi-Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="oneday">One Day Pass</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="price-amount">Price (Credits):</label>
+                            <input type="number" id="price-amount" min="10" placeholder="Enter price">
+                        </div>
+                        <div class="form-group">
+                            <label for="membership-title">Membership Title:</label>
+                            <input type="text" id="membership-title" placeholder="e.g., VIP Access">
+                        </div>
+                        <div class="form-group">
+                            <label for="membership-description">Description:</label>
+                            <textarea id="membership-description" placeholder="Describe membership benefits..."></textarea>
+                        </div>
+                        <button id="save-settings" class="primary-btn">Save Settings</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Grace Period</h3>
+                    <div class="form-group">
+                        <label for="grace-days">Grace Period (Days):</label>
+                        <input type="number" id="grace-days" min="0" max="30" value="3">
+                        <small>Days after expiration before membership is revoked</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Notifications</h3>
+                    <div class="notification-settings">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-expiring" checked>
+                            <span class="checkmark"></span>
+                            Notify when memberships are expiring
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-new-members" checked>
+                            <span class="checkmark"></span>
+                            Notify on new member registrations
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Details Modal -->
+    <div class="modal" id="member-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Member Details</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="member-details"></div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
