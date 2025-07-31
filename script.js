@@ -24,6 +24,9 @@ async function init() {
         await loadMembers();
         await loadPayments();
         
+        // Scan existing comments for tip payments
+        await scanExistingTipComments();
+        
         setupEventListeners();
         setupRealtimeUpdates();
         updateDashboard();
@@ -31,6 +34,40 @@ async function init() {
     } catch (error) {
         console.error('Initialization error:', error);
         showError('Failed to initialize application');
+    }
+}
+
+// Scan existing comments for tip payments
+async function scanExistingTipComments() {
+    try {
+        const project = await window.websim.getCurrentProject();
+        const response = await fetch(`/api/v1/projects/${project.id}/comments?only_tips=true&first=100`);
+        
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        const tipComments = data.comments.data;
+        
+        for (const commentData of tipComments) {
+            const comment = commentData.comment;
+            
+            // Check if we already processed this tip
+            const existingPayment = payments.find(p => p.comment_id === comment.id);
+            if (existingPayment) continue;
+            
+            // Process the tip comment
+            if (comment.card_data && comment.card_data.type === 'tip_comment') {
+                await handleNewPayment(comment, false); // false = don't show notification for existing tips
+            }
+        }
+        
+        // Refresh data after processing
+        await loadMembers();
+        await loadPayments();
+        updateDashboard();
+        
+    } catch (error) {
+        console.error('Error scanning existing tip comments:', error);
     }
 }
 
@@ -127,10 +164,14 @@ function setupRealtimeUpdates() {
 }
 
 // Handle new payment from tip comment
-async function handleNewPayment(comment) {
+async function handleNewPayment(comment, showNotif = true) {
     const creditsSpent = comment.card_data.credits_spent;
     const userId = comment.author.id;
     const username = comment.author.username;
+    
+    // Check if payment already exists
+    const existingPayment = payments.find(p => p.comment_id === comment.id);
+    if (existingPayment) return;
     
     // Find existing member or create new one
     let member = members.find(m => m.user_id === userId);
@@ -168,8 +209,10 @@ async function handleNewPayment(comment) {
         pricing_model: membershipConfig.pricing_model
     });
     
-    // Show notification
-    showNotification(`New payment of ${creditsSpent} credits from @${username}`, 'success');
+    // Show notification only for new payments
+    if (showNotif) {
+        showNotification(`New payment of ${creditsSpent} credits from @${username}`, 'success');
+    }
 }
 
 // Calculate membership end date based on payment
