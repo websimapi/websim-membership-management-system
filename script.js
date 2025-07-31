@@ -225,7 +225,17 @@ function calculateMembershipEnd(creditsSpent, currentEnd = null) {
     
     if (periods === 0) return currentEnd; // Partial payment
     
-    const startDate = currentEnd ? new Date(currentEnd) : new Date();
+    const now = new Date();
+    let startDate;
+    
+    if (currentEnd) {
+        const currentEndDate = new Date(currentEnd);
+        // If membership has expired, start from now. If still active, extend from current end.
+        startDate = currentEndDate > now ? currentEndDate : now;
+    } else {
+        // New member, start from now
+        startDate = now;
+    }
     
     switch (pricingModel) {
         case 'daily':
